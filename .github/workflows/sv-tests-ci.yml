@@ -7,7 +7,7 @@ on:
 
 jobs:
   Summary:
-    if: github.event_name != 'pull_request_target'
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: Summary
     runs-on: ubuntu-18.04
     steps:
