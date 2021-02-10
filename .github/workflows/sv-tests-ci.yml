@@ -2,10 +2,12 @@ name: sv-tests-ci
 
 on:
   push:
+  pull_request:
   pull_request_target:
 
 jobs:
   Summary:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: Summary
     runs-on: ubuntu-18.04
     steps:
