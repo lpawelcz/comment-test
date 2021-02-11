@@ -14,38 +14,12 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.7
+      - name: Save PR number
+        run: |
+          echo ${{ github.event.number }} > ./out/report/issue_num
       - uses: actions/upload-artifact@v2
         with:
           name: tests_summary
           path: |
             ./out/report/tests_summary.md
-
-  Comment:
-    if: github.event_name == 'pull_request'
-    name: Comment
-    runs-on: ubuntu-18.04
-    needs: Summary
-    steps:
-      - name: Prepare output directories
-        run: mkdir -p out/report
-      - uses: actions/download-artifact@v2
-        with:
-          name: tests_summary
-          path: ./out/report
-      - id: get-comment-body
-        run: |
-          body=$(cat ./out/report/tests_summary.md)
-          body="${body//'%'/'%25'}"
-          body="${body//$'\n'/'%0A'}"
-          body="${body//$'\r'/'%0D'}"
-          echo ::set-output name=body::$body
-      - uses: actions/github-script@v3
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: ${{ steps.get-comment-body.outputs.body }}
-            })
+            ./out/report/issue_num
