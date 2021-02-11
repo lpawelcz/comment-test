@@ -43,7 +43,7 @@ jobs:
       - uses: actions/github-script@v3
         id: get-comment-body
         with:
-          script: return $(cat ./out/report/tests_summary.md)
+          script: return "$(cat ./out/report/tests_summary.md)"
           result-encoding: string
 
       - name: Get result
