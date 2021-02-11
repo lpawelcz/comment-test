@@ -3,11 +3,9 @@ name: sv-tests-ci
 on:
   push:
   pull_request:
-  pull_request_target:
 
 jobs:
   Summary:
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: Summary
     runs-on: ubuntu-18.04
     steps:
@@ -23,7 +21,7 @@ jobs:
             ./out/report/tests_summary.md
 
   Comment:
-    if: github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request'
     name: Comment
     runs-on: ubuntu-18.04
     needs: Summary
@@ -41,10 +39,13 @@ jobs:
           body="${body//$'\n'/'%0A'}"
           body="${body//$'\r'/'%0D'}"
           echo ::set-output name=body::$body
-      - name: Post comment
-        uses: KeisukeYamashita/create-comment@v1
+      - uses: actions/github-script@v3
         with:
-          check-only-first-line: "true"
-          unique: "true"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          comment: ${{ steps.get-comment-body.outputs.body }}
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: ${{ steps.get-comment-body.outputs.body }}
+            })
