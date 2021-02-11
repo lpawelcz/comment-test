@@ -62,8 +62,6 @@ jobs:
               body: 'Everything is OK. Thank you for the PR!'
             });
 
-      - run: echo ${{ steps.get-comment-body.outputs.body }}
-
       - name: 'Comment on PR extended'
         uses: actions/github-script@v3
         with:
