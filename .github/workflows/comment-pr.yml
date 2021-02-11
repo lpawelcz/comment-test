@@ -56,7 +56,7 @@ jobs:
       - name: Post comment
         uses: KeisukeYamashita/create-comment@v1
         with:
-          number: ${{ steps.get-pr-number.outputs.body }}
+          number: ${{ steps.get-pr-number.outputs.num }}
           check-only-first-line: "true"
           unique: "true"
           token: ${{ secrets.GITHUB_TOKEN }}
