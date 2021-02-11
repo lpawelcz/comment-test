@@ -40,31 +40,24 @@ jobs:
 
       - run: unzip tests_summary.zip -d ./out/report
 
-      - name: 'Comment on PR'
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            var fs = require('fs');
-            var issue_number = Number(fs.readFileSync('./out/report/issue_num'));
-            await github.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue_number,
-              body: 'Everything is OK. Thank you for the PR!'
-            });
+      - id: get-comment-body
+        run: |
+          body=$(cat ./out/report/tests_summary.md)
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}"
+          echo ::set-output name=body::$body
 
-      - name: 'Comment on PR extended'
-        uses: actions/github-script@v3
+      - id: get-pr-number
+        run: |
+          num=$(cat ./out/report/issue_num)
+          echo ::set-output name=num::$num
+
+      - name: Post comment
+        uses: KeisukeYamashita/create-comment@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            var fs = require('fs');
-            var issue_number = Number(fs.readFileSync('./out/report/issue_num'));
-            var comment_body = fs.readFileSync('./out/report/tests_summary.md', 'utf8');
-            await github.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue_number,
-              body: comment_body
-            });
+          number: ${{ steps.get-pr-number.outputs.body }}
+          check-only-first-line: "true"
+          unique: "true"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          comment: ${{ steps.get-comment-body.outputs.body }}
