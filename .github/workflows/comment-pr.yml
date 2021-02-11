@@ -40,13 +40,14 @@ jobs:
 
       - run: unzip tests_summary.zip -d ./out/report
 
-      - id: get-comment-body
-        run: |
-          body=$(cat ./out/report/tests_summary.md)
-          body="${body//'%'/'%25'}"
-          body="${body//$'\n'/'%0A'}"
-          body="${body//$'\r'/'%0D'}"
-          echo ::set-output name=body::$body
+      - uses: actions/github-script@v3
+        id: get-comment-body
+        with:
+          script: return $(cat ./out/report/tests_summary.md)
+          result-encoding: string
+
+      - name: Get result
+        run: echo "${{steps.get-comment-body.outputs.result}}"
 
       - name: 'Comment on PR'
         uses: actions/github-script@v3
@@ -73,5 +74,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
-              body: '${{ steps.get-comment-body.outputs.body }}'
+              body: ${{steps.get-comment-body.outputs.result}}
             });
